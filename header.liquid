@@ -1,1 +1,115 @@
+{% assign timing_in_ms = section.settings.announcement_bar_timing | times: 1000 %}
 
+{%- if section.blocks.size > 0 -%}
+  <div
+    class="announcement-bar{% if section.blocks.size > 1 %} {% endif %} fade"
+    data-section-id="{{ section.id }}"
+    data-section-type="announcement-bar"
+    data-timing="{{ timing_in_ms }}"
+  >
+    {%- for block in section.blocks -%}
+      <div
+        class="announcement-bar__slide flex items-center justify-center fade-cell"
+        style="
+          background-color: {{ block.settings.background_color }};
+          color: {{ block.settings.text_color }};
+          --color-gradient-overlay: {{ block.settings.background_color | color_to_rgb | replace: 'rgb', 'rgba' | replace: ')', ', 100)' }};
+          --color-gradient-overlay-transparent: {{ block.settings.background_color | color_to_rgb | replace: 'rgb', 'rgba' | replace: ')', ', 0)' }};
+        "
+        data-index="{{ forloop.index0 }}"
+        {{ block.shopify_attributes }}
+      >
+        <div class="announcement-bar__content">
+          {%- if block.settings.moneyleft -%}
+            {% if cart.total_price <= 0 %}
+              Free Shipping on Orders Over $140
+            {% else %}
+              {% if cart.total_price > 14000 %}
+                You've got FREE Shipping!
+              {% else %}
+                You're only ${{ 14000 | minus: cart.total_price | divided_by:100 }} away from free shipping
+              {% endif %}  
+            {% endif %}
+
+            
+          {%- else -%}
+            {%- if block.settings.link != blank -%}
+            <a class="color-inherit" href="{{ block.settings.link }}">
+              {{ block.settings.text | escape }}
+            </a>
+            {%- else -%}
+              {{ block.settings.text | escape }}
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+
+        <div class="announcement-bar__gradient-gap"></div>
+      </div>
+    {%- endfor -%}
+  </div>
+{%- endif -%}
+
+
+{% schema %}
+  {
+    "name": "t:sections.announcement_bar.name",
+    "tag": "section",
+    "class": "announcement-bar-section",
+    "settings": [
+      {
+        "type": "range",
+        "id": "announcement_bar_timing",
+        "label": "t:sections.announcement_bar.settings.announcement_bar_timing.label",
+        "min": 3,
+        "max": 15,
+        "step": 1,
+        "default": 5
+      }
+    ],
+    "max_blocks": 3,
+    "blocks": [
+      {
+        "type": "announcement",
+        "name": "t:sections.announcement_bar.blocks.announcement.name",
+        "settings": [
+          {
+            "type": "color",
+            "id": "background_color",
+            "label": "t:sections.announcement_bar.blocks.announcement.settings.background_color.label"
+          },
+          {
+            "type": "color",
+            "id": "text_color",
+            "label": "t:sections.announcement_bar.blocks.announcement.settings.text_color.label",
+            "default": "#ffffff"
+          },
+          {
+            "type": "text",
+            "id": "text",
+            "label": "t:sections.announcement_bar.blocks.announcement.settings.text.label",
+            "default": "Announce something here"
+          },
+          {
+            "type": "url",
+            "id": "link",
+            "label": "t:sections.announcement_bar.blocks.announcement.settings.link.label",
+            "info": "t:sections.announcement_bar.blocks.announcement.settings.link.info"
+          },
+          {
+            "type": "checkbox",
+            "id": "moneyleft",
+            "label": "Enable Money left to free shipping",
+            "default": false
+          }
+        ]
+      }
+    ],
+    "default": {
+      "blocks": [
+        {
+          "type": "announcement"
+        }
+      ]
+    }
+  }
+{% endschema %}
